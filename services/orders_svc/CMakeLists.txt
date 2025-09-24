@@ -29,7 +29,7 @@ add_executable(orders_svc
   src/main.cpp
   ${PROTO_SRCS} ${GRPC_SRCS}
 )
-target_include_directories(orders_svc PRIVATE ${PROTO_DIR})
+target_include_directories(orders_svc PRIVATE ${PROTO_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../common)
 target_link_libraries(orders_svc
   PRIVATE gRPC::grpc++ protobuf::libprotobuf pqxx redis++ rdkafka++ spdlog::spdlog
 )

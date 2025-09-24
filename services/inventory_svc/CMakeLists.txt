@@ -9,12 +9,16 @@ find_package(redis++ REQUIRED)
 find_package(RdKafka REQUIRED)
 find_package(spdlog REQUIRED)
 
-include_directories(../../proto)
-
 add_executable(inventory_svc
   src/main.cpp
 )
 
 target_link_libraries(inventory_svc
   PRIVATE gRPC::grpc++ protobuf::libprotobuf pqxx redis++ rdkafka++ spdlog::spdlog
+)
+
+target_include_directories(inventory_svc
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../proto
+    ${CMAKE_CURRENT_SOURCE_DIR}/../common
 )

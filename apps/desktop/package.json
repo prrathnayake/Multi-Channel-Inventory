@@ -1,0 +1,16 @@
+{
+  "name": "omnistock-desktop",
+  "version": "0.1.0",
+  "description": "Lightweight Electron shell for OmniStock operations",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "lint": "echo 'No lint configured'"
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0"
+  },
+  "devDependencies": {
+    "electron": "^28.2.0"
+  }
+}
