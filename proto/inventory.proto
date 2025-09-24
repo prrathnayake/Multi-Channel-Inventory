@@ -1,0 +1,24 @@
+syntax = "proto3";
+package omnistock.inventory.v1;
+
+import "google/api/annotations.proto";
+
+message StockQuery { string tenant_id = 1; string sku = 2; string location = 3; }
+message StockView { int64 on_hand = 1; int64 reserved = 2; int64 available = 3; }
+message AdjustRequest {
+  string tenant_id = 1; string sku = 2; string location = 3; int64 qty = 4;
+  string reason = 5; string note = 6; string idempotency_key = 7;
+}
+message AdjustResponse { string movement_id = 1; StockView new_state = 2; }
+
+service InventoryService {
+  rpc GetStock(StockQuery) returns (StockView) {
+    option (google.api.http) = { get: "/v1/tenants/{tenant_id}/stock" };
+  }
+  rpc Adjust(AdjustRequest) returns (AdjustResponse) {
+    option (google.api.http) = {
+      post: "/v1/tenants/{tenant_id}/movements/adjust"
+      body: "*"
+    };
+  }
+}

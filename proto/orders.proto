@@ -1,0 +1,13 @@
+syntax = "proto3";
+package omnistock.orders.v1;
+import "google/api/annotations.proto";
+
+message Line { string sku = 1; int64 qty = 2; }
+message CreateOrderReq { string tenant_id = 1; string id = 2; repeated Line lines = 3; }
+message CreateOrderRes { string order_id = 1; string state = 2; }
+
+service OrdersService {
+  rpc Create(CreateOrderReq) returns (CreateOrderRes) {
+    option (google.api.http) = { post: "/v1/tenants/{tenant_id}/orders" body: "*" };
+  }
+}
