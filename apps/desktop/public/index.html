@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>OmniStock Desktop</title>
+    <style>
+      body { font-family: sans-serif; margin: 0; padding: 1rem; background: #f5f6f8; }
+      header { margin-bottom: 1.5rem; }
+      section { background: #fff; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+      label { display: block; margin-bottom: 0.5rem; }
+      input, textarea { width: 100%; padding: 0.5rem; margin-top: 0.25rem; }
+      button { padding: 0.5rem 1rem; margin-top: 0.5rem; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { border-bottom: 1px solid #ddd; padding: 0.5rem; text-align: left; }
+      .row { display: flex; flex-wrap: wrap; gap: 1rem; }
+      .row > div { flex: 1 1 280px; }
+      pre { background: #f0f0f0; padding: 0.75rem; overflow: auto; border-radius: 6px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>OmniStock Desktop Console</h1>
+      <p>Manage stock, review inventory, and place orders directly against the OmniStock stack.</p>
+    </header>
+
+    <section id="settings">
+      <h2>Connection</h2>
+      <div class="row">
+        <div>
+          <label>API Base URL
+            <input id="apiBaseUrl" type="text" />
+          </label>
+        </div>
+        <div>
+          <label>Tenant ID
+            <input id="tenantId" type="text" />
+          </label>
+        </div>
+        <div>
+          <label>Location
+            <input id="location" type="text" />
+          </label>
+        </div>
+      </div>
+      <button id="saveSettings">Save Settings</button>
+      <span id="settingsStatus"></span>
+    </section>
+
+    <section id="inventory">
+      <h2>Inventory Lookup</h2>
+      <label>SKU (optional)
+        <input id="skuInput" type="text" placeholder="Enter SKU" />
+      </label>
+      <button id="refreshInventory">Fetch Inventory</button>
+      <div id="inventoryError" style="color: red;"></div>
+      <table>
+        <thead>
+          <tr>
+            <th>SKU</th>
+            <th>Available</th>
+            <th>On Hand</th>
+            <th>Location</th>
+          </tr>
+        </thead>
+        <tbody id="inventoryRows"></tbody>
+      </table>
+    </section>
+
+    <section id="orders">
+      <h2>Create Order</h2>
+      <p>Provide a client reference and at least one line item.</p>
+      <label>Client Reference
+        <input id="orderRef" type="text" placeholder="External reference" />
+      </label>
+      <label>Order Lines JSON
+        <textarea id="orderLines" rows="6" placeholder='[{"sku":"SKU-1","quantity":1}]'></textarea>
+      </label>
+      <button id="createOrder">Submit Order</button>
+      <div id="orderStatus"></div>
+      <pre id="orderResult"></pre>
+    </section>
+
+    <script>
+      const status = {
+        settings: document.getElementById('settingsStatus'),
+        inventoryError: document.getElementById('inventoryError'),
+        orderStatus: document.getElementById('orderStatus'),
+        orderResult: document.getElementById('orderResult')
+      };
+
+      const inputs = {
+        apiBaseUrl: document.getElementById('apiBaseUrl'),
+        tenantId: document.getElementById('tenantId'),
+        location: document.getElementById('location'),
+        sku: document.getElementById('skuInput'),
+        orderRef: document.getElementById('orderRef'),
+        orderLines: document.getElementById('orderLines'),
+        inventoryRows: document.getElementById('inventoryRows')
+      };
+
+      const renderInventory = (rows) => {
+        inputs.inventoryRows.innerHTML = '';
+        if (!rows || !rows.items || rows.items.length === 0) {
+          const tr = document.createElement('tr');
+          const td = document.createElement('td');
+          td.colSpan = 4;
+          td.innerText = 'No results';
+          tr.appendChild(td);
+          inputs.inventoryRows.appendChild(tr);
+          return;
+        }
+        rows.items.forEach((item) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${item.sku}</td><td>${item.available}</td><td>${item.onHand}</td><td>${item.locationId || ''}</td>`;
+          inputs.inventoryRows.appendChild(tr);
+        });
+      };
+
+      const bootstrap = async () => {
+        const current = await window.omnistock.getSettings();
+        inputs.apiBaseUrl.value = current.apiBaseUrl;
+        inputs.tenantId.value = current.tenantId;
+        inputs.location.value = current.location;
+        renderInventory({ items: [] });
+      };
+
+      document.getElementById('saveSettings').addEventListener('click', async () => {
+        status.settings.textContent = 'Saving…';
+        try {
+          await window.omnistock.saveSettings({
+            apiBaseUrl: inputs.apiBaseUrl.value,
+            tenantId: inputs.tenantId.value,
+            location: inputs.location.value
+          });
+          status.settings.textContent = 'Saved ✅';
+        } catch (err) {
+          console.error(err);
+          status.settings.textContent = 'Failed to save';
+        }
+      });
+
+      document.getElementById('refreshInventory').addEventListener('click', async () => {
+        status.inventoryError.textContent = '';
+        try {
+          const data = await window.omnistock.fetchInventory(inputs.sku.value.trim());
+          renderInventory(data);
+        } catch (err) {
+          status.inventoryError.textContent = err.message;
+        }
+      });
+
+      document.getElementById('createOrder').addEventListener('click', async () => {
+        status.orderStatus.textContent = 'Submitting…';
+        status.orderResult.textContent = '';
+        try {
+          const lines = JSON.parse(inputs.orderLines.value || '[]');
+          const payload = {
+            clientReference: inputs.orderRef.value || undefined,
+            lines: lines
+          };
+          const result = await window.omnistock.createOrder(payload);
+          status.orderStatus.textContent = 'Order submitted ✅';
+          status.orderResult.textContent = JSON.stringify(result, null, 2);
+        } catch (err) {
+          status.orderStatus.textContent = `Failed: ${err.message}`;
+        }
+      });
+
+      bootstrap();
+    </script>
+  </body>
+</html>
