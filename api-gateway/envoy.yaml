@@ -15,10 +15,12 @@ static_resources:
             - name: all
               domains: ["*"]
               routes:
-              - match: { prefix: "/v1/tenants/" }
-                route: { cluster: inventory_svc, timeout: 30s }
-              - match: { prefix: "/v1/tenants/" }
+              - match:
+                  safe_regex: { regex: "^/v1/tenants/[^/]+/orders" }
                 route: { cluster: orders_svc, timeout: 30s }
+              - match:
+                  safe_regex: { regex: "^/v1/tenants/[^/]+/(stock|movements/adjust)" }
+                route: { cluster: inventory_svc, timeout: 30s }
           http_filters:
           - name: envoy.filters.http.grpc_json_transcoder
             typed_config:

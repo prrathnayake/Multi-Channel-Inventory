@@ -5,7 +5,8 @@
 #include <spdlog/spdlog.h>
 #include <cstdlib>
 #include <string>
-#include <functional>
+#include <chrono>
+#include "../../common/redis_lock.h"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -18,17 +19,6 @@ static std::string env_or(const char *key, const char *defv)
   const char *v = std::getenv(key);
   return v ? std::string(v) : std::string(defv);
 }
-
-// Simple RAII scope guard to ensure cleanup
-struct ScopeGuard
-{
-  std::function<void()> fn;
-  ~ScopeGuard()
-  {
-    if (fn)
-      fn();
-  }
-};
 
 class InventoryImpl final : public inv::InventoryService::Service
 {
@@ -72,12 +62,9 @@ public:
   Status Adjust(ServerContext *, const inv::AdjustRequest *req, inv::AdjustResponse *res) override
   {
     auto lock_key = "lock:" + req->tenant_id() + ":" + req->sku() + ":" + req->location();
-    if (!redis_.set(lock_key, "1", std::chrono::seconds(10), sw::redis::UpdateType::NOT_EXIST))
+    RedisLease lease(redis_, lock_key, std::chrono::seconds(30));
+    if (!lease.acquired())
       return Status(grpc::StatusCode::ABORTED, "busy");
-
-    // RAII cleanup: ensure Redis lock is released even if an exception occurs
-    ScopeGuard unlock{[&]
-                      { try { redis_.del(lock_key); } catch(...){} }};
 
     try
     {
