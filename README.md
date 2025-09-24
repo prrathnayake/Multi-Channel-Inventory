@@ -1,4 +1,4 @@
-<<<<<<< codex/review-the-project-4tq0d4
+
 # OmniStock — C++ gRPC Inventory Template
 
 Multi-tenant, high-performance inventory/warehouse template with:
@@ -739,7 +739,6 @@ Multi-tenant, high-performance inventory/warehouse template with:
 - Docker Compose for dev
 
 ## Development Setup
-<<<<<<< codex/review-the-project-ynuseo
 
 1. **Fetch Google API annotations** (required for REST↔gRPC transcoding):
    ```bash
@@ -809,14 +808,10 @@ Scan the QR code with Expo Go or launch an emulator. Adjust API details from wit
    ```
 
 4. **Visit the UI** at [http://localhost:3000](http://localhost:3000) to adjust stock levels and create orders. The UI talks to Envoy’s REST endpoint which transparently proxies gRPC calls.
->>>>>>> main
 
-
-<<<<<<< codex/review-the-project-ynuseo
 ### Commerce Integrations
 
 - **WooCommerce** — `integrations/wordpress/` contains a plugin that embeds live OmniStock availability on product pages.
 - **Shopify** — `integrations/shopify/` provides scripts for inventory synchronisation and an order webhook bridge. See the directory README for environment variables and usage.
 
-=======
->>>>>>> main
+
