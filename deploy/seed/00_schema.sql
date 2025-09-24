@@ -36,6 +36,22 @@ create table inventory_movements (
   at timestamptz default now()
 );
 
+create table orders (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid references tenants(id),
+  external_id text,
+  state text not null default 'NEW',
+  created_at timestamptz default now(),
+  unique(tenant_id, external_id)
+);
+
+create table order_lines (
+  id bigserial primary key,
+  order_id uuid references orders(id) on delete cascade,
+  sku text not null,
+  qty int not null check (qty > 0)
+);
+
 create table outbox (
   id bigserial primary key,
   topic text,
