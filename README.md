@@ -1,4 +1,4 @@
-# OmniStock — C++ gRPC Inventory Template
+# OmniStock — C++ gRPC Inventory – Under Development
 
 Multi-tenant, high-performance inventory/warehouse template with:
 - C++20 microservices (gRPC)
@@ -97,3 +97,4 @@ Scan the QR code with Expo Go or launch an emulator. Adjust API details from wit
 ### Resetting the Database
 
 The seed script under `deploy/seed/00_schema.sql` bootstraps tenants, products, inventory, and the new `orders`/`order_lines` tables. To start fresh, remove the `pgdata` volume (`docker volume rm deploy_pgdata`) and re-run Docker Compose.
+
