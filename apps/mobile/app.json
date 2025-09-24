@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "OmniStock",
+    "slug": "omnistock",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "extra": {
+      "apiBaseUrl": "http://localhost:8080/v1",
+      "tenantId": "demo",
+      "location": "WH1"
+    }
+  }
+}
