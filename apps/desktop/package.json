@@ -4,13 +4,10 @@
   "description": "Lightweight Electron shell for OmniStock operations",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "node scripts/run-electron.cjs",
     "lint": "echo 'No lint configured'"
   },
   "dependencies": {
     "electron-store": "^8.1.0"
-  },
-  "devDependencies": {
-    "electron": "^28.2.0"
   }
 }
